@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using BookIt.Data;
+using BookIt.Middleware;
 using BookIt.Services;
 using BookIt.Services.Interfaces;
 using BookIt.Settings;
@@ -66,6 +67,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
