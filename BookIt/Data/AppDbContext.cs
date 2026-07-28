@@ -25,10 +25,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(b => b.Category);
             entity.HasIndex(b => b.CreatedAt).IsDescending();
 
-            // 1:1 — a Business is owned by exactly one User, an owner has at most one Business.
+            // 1:many — an owner may run several businesses.
             entity.HasOne(b => b.Owner)
-                .WithOne(u => u.OwnedBusiness)
-                .HasForeignKey<Business>(b => b.OwnerId);
+                .WithMany(u => u.OwnedBusinesses)
+                .HasForeignKey(b => b.OwnerId);
         });
 
         modelBuilder.Entity<Service>(entity =>

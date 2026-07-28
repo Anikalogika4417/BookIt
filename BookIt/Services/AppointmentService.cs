@@ -28,16 +28,14 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
 
         var endTime = request.StartTime.AddMinutes(service.DurationMinutes);
 
-        // Overlap check across the whole business: the owner performs every service
-        // of their business, so they cannot be double-booked regardless of which service it is.
-        var ownerOverlap = await context.Appointments
+        var serviceOverlap = await context.Appointments
             .Where(a => a.Status != AppointmentStatus.Cancelled)
-            .Where(a => a.Service.BusinessId == service.BusinessId)
+            .Where(a => a.ServiceId == service.Id)
             .AnyAsync(a => a.StartTime < endTime && request.StartTime < a.EndTime, cancellationToken);
 
-        if (ownerOverlap)
+        if (serviceOverlap)
         {
-            return CreateAppointmentResult.OwnerOverlap;
+            return CreateAppointmentResult.ServiceOverlap;
         }
 
         var clientOverlap = await context.Appointments
@@ -110,7 +108,6 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
                 Id = a.Id,
                 ServiceName = a.Service.Name,
                 BusinessName = a.Service.Business.Name,
-                OwnerName = a.Service.Business.Owner.FullName,
                 StartTime = a.StartTime,
                 EndTime = a.EndTime,
                 Price = a.Service.Price,

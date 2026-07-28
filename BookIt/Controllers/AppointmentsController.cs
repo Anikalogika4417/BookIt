@@ -23,7 +23,7 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
         return result switch
         {
             CreateAppointmentResult.ServiceNotFound => NotFound("Service not found."),
-            CreateAppointmentResult.OwnerOverlap => Conflict("The business owner already has an appointment during this time."),
+            CreateAppointmentResult.ServiceOverlap => Conflict("This service is already booked during this time."),
             CreateAppointmentResult.ClientOverlap => Conflict("You already have an appointment during this time."),
             _ => Ok()
         };

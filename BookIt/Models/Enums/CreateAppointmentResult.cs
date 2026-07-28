@@ -4,6 +4,6 @@ public enum CreateAppointmentResult
 {
     Success,
     ServiceNotFound,
-    OwnerOverlap,
+    ServiceOverlap,
     ClientOverlap
 }

@@ -119,10 +119,15 @@ namespace BookIt.Migrations
                 column: "Category");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Businesses_CreatedAt",
+                table: "Businesses",
+                column: "CreatedAt",
+                descending: new bool[0]);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Businesses_OwnerId",
                 table: "Businesses",
-                column: "OwnerId",
-                unique: true);
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Services_BusinessId",

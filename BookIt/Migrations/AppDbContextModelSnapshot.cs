@@ -88,8 +88,7 @@ namespace BookIt.Migrations
                     b.HasIndex("CreatedAt")
                         .IsDescending();
 
-                    b.HasIndex("OwnerId")
-                        .IsUnique();
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Businesses");
                 });
@@ -184,8 +183,8 @@ namespace BookIt.Migrations
             modelBuilder.Entity("BookIt.Models.Business", b =>
                 {
                     b.HasOne("BookIt.Models.User", "Owner")
-                        .WithOne("OwnedBusiness")
-                        .HasForeignKey("BookIt.Models.Business", "OwnerId")
+                        .WithMany("OwnedBusinesses")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -217,7 +216,7 @@ namespace BookIt.Migrations
                 {
                     b.Navigation("Appointments");
 
-                    b.Navigation("OwnedBusiness");
+                    b.Navigation("OwnedBusinesses");
                 });
 #pragma warning restore 612, 618
         }
