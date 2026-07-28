@@ -2,8 +2,8 @@ namespace BookIt.Models;
 
 public class Service
 {
-    public int Id { get; set; }
-    public int BusinessId { get; set; }
+    public Guid Id { get; set; }
+    public Guid BusinessId { get; set; }
     public Business Business { get; set; } = null!;
     public string Name { get; set; } = string.Empty;
     public int DurationMinutes { get; set; }

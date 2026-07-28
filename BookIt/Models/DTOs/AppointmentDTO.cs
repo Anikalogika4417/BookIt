@@ -4,7 +4,7 @@ namespace BookIt.Models.DTOs;
 
 public class AppointmentDTO
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string ServiceName { get; set; } = string.Empty;
     public string BusinessName { get; set; } = string.Empty;
     public string OwnerName { get; set; } = string.Empty;
