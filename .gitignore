@@ -361,3 +361,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local settings (secrets, connection strings, JWT key)
+appsettings.Development.json
+appsettings.*.local.json
+*.env
+.env# 
+
+Claude Code context file (local only, not for submission)
+CLAUDE.md
