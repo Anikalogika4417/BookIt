@@ -1,6 +1,7 @@
 using BookIt.Data;
 using BookIt.Models.DTOs;
 using BookIt.Models.DTOs.Response;
+using BookIt.Models.Enums;
 using BookIt.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -49,5 +50,45 @@ public class BusinessService(AppDbContext context) : IBusinessService
             PageSize = pageSize,
             TotalCount = totalCount
         };
+    }
+
+    public async Task<(BusinessSummaryResult Result, GetSummaryResponse? Response)> GetBusinessSummaryAsync(
+        Guid businessId, Guid requestingUserId)
+    {
+        var business = await context.Businesses
+            .AsNoTracking()
+            .SingleOrDefaultAsync(b => b.Id == businessId && !b.IsDeleted);
+
+        if (business is null)
+        {
+            return (BusinessSummaryResult.NotFound, null);
+        }
+
+        if (business.OwnerId != requestingUserId)
+        {
+            return (BusinessSummaryResult.Forbidden, null);
+        }
+
+        var now = DateTimeOffset.UtcNow;
+
+        var services = await context.Services
+            .Where(s => s.BusinessId == businessId && !s.IsDeleted)
+            .Select(s => new
+            {
+                s.Id,
+                s.Name,
+                s.Price,
+                UpcomingCount = s.Appointments.Count(a => a.StartTime > now && a.Status != AppointmentStatus.Cancelled)
+            })
+            .Select(x => new ServiceSummaryDTO
+            {
+                ServiceId = x.Id,
+                ServiceName = x.Name,
+                UpcomingAppointmentsCount = x.UpcomingCount,
+                ExpectedRevenue = x.UpcomingCount * x.Price
+            })
+            .ToListAsync();
+
+        return (BusinessSummaryResult.Success, new GetSummaryResponse { Services = services });
     }
 }

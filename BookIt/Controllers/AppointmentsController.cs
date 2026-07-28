@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using BookIt.Extensions;
 using BookIt.Models.DTOs.Request;
 using BookIt.Models.Enums;
 using BookIt.Services.Interfaces;
@@ -16,7 +16,7 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
     [Authorize(Roles = nameof(UserRole.Client))]
     public async Task<IActionResult> CreateAppointment(AppointmentRequest request)
     {
-        var clientId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var clientId = User.GetUserId();
 
         var result = await appointmentService.CreateAppointmentAsync(clientId, request);
 
@@ -37,8 +37,8 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var role = Enum.Parse<UserRole>(User.FindFirstValue(ClaimTypes.Role)!);
+        var userId = User.GetUserId();
+        var role = User.GetRole();
 
         var response = await appointmentService.GetAppointmentsAsync(userId, role, from, to, status, pageNumber, pageSize);
         return Ok(response);
