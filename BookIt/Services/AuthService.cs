@@ -38,7 +38,10 @@ public class AuthService(AppDbContext context, JwtSettings jwtSettings) : IAuthS
 
     public async Task<string?> LoginAsync(LoginRequest request)
     {
-        var user = await context.Users.SingleOrDefaultAsync(u => u.Email == request.Email && !u.IsDeleted);
+        var user = await context.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(u => u.Email == request.Email && !u.IsDeleted);
+
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return null;
