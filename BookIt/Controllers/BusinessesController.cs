@@ -16,17 +16,18 @@ public class BusinessesController(IBusinessService businessService) : Controller
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? category = null,
-        [FromQuery] string? search = null)
+        [FromQuery] string? search = null,
+        CancellationToken cancellationToken = default)
     {
-        var response = await businessService.GetBusinessesAsync(pageNumber, pageSize, category, search);
+        var response = await businessService.GetBusinessesAsync(pageNumber, pageSize, category, search, cancellationToken);
         return Ok(response);
     }
 
     [HttpGet("{id:guid}/summary")]
     [Authorize(Roles = nameof(UserRole.BusinessOwner))]
-    public async Task<IActionResult> GetBusinessSummary(Guid id)
+    public async Task<IActionResult> GetBusinessSummary(Guid id, CancellationToken cancellationToken = default)
     {
-        var (result, response) = await businessService.GetBusinessSummaryAsync(id, User.GetUserId());
+        var (result, response) = await businessService.GetBusinessSummaryAsync(id, User.GetUserId(), cancellationToken);
 
         return result switch
         {

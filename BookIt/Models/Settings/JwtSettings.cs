@@ -1,4 +1,4 @@
-namespace BookIt.Settings;
+namespace BookIt.Models.Settings;
 
 public class JwtSettings
 {

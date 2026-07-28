@@ -14,7 +14,7 @@ namespace BookIt.Migrations
                 name: "IX_Businesses_CreatedAt",
                 table: "Businesses",
                 column: "CreatedAt",
-                descending: new bool[0]);
+                descending: []);
         }
 
         /// <inheritdoc />

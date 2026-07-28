@@ -4,8 +4,8 @@ using System.Text;
 using BookIt.Data;
 using BookIt.Models;
 using BookIt.Models.DTOs.Request;
+using BookIt.Models.Settings;
 using BookIt.Services.Interfaces;
-using BookIt.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,9 +13,9 @@ namespace BookIt.Services;
 
 public class AuthService(AppDbContext context, JwtSettings jwtSettings) : IAuthService
 {
-    public async Task<bool> RegisterAsync(AuthRequest request)
+    public async Task<bool> RegisterAsync(AuthRequest request, CancellationToken cancellationToken = default)
     {
-        var emailTaken = await context.Users.AnyAsync(u => u.Email == request.Email);
+        var emailTaken = await context.Users.AnyAsync(u => u.Email == request.Email, cancellationToken);
         if (emailTaken)
         {
             return false;
@@ -31,17 +31,16 @@ public class AuthService(AppDbContext context, JwtSettings jwtSettings) : IAuthS
         };
 
         context.Users.Add(user);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
 
         return true;
     }
 
-    public async Task<string?> LoginAsync(LoginRequest request)
+    public async Task<string?> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var user = await context.Users
             .AsNoTracking()
-            .SingleOrDefaultAsync(u => u.Email == request.Email && !u.IsDeleted);
-
+            .SingleOrDefaultAsync(u => u.Email == request.Email && !u.IsDeleted, cancellationToken);
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return null;

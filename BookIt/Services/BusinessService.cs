@@ -12,7 +12,8 @@ public class BusinessService(AppDbContext context) : IBusinessService
     private const int DefaultPageSize = 10;
     private const int MaxPageSize = 50;
 
-    public async Task<BusinessResponse> GetBusinessesAsync(int pageNumber, int pageSize, string? category, string? search)
+    public async Task<BusinessResponse> GetBusinessesAsync(
+        int pageNumber, int pageSize, string? category, string? search, CancellationToken cancellationToken = default)
     {
         pageNumber = pageNumber < 1 ? 1 : pageNumber;
         pageSize = pageSize < 1 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
@@ -29,7 +30,7 @@ public class BusinessService(AppDbContext context) : IBusinessService
             query = query.Where(b => EF.Functions.ILike(b.Name, $"%{search}%"));
         }
 
-        var totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync(cancellationToken);
 
         var businesses = await query
             .OrderByDescending(b => b.CreatedAt)
@@ -41,7 +42,7 @@ public class BusinessService(AppDbContext context) : IBusinessService
                 Name = b.Name,
                 Category = b.Category
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return new BusinessResponse
         {
@@ -53,11 +54,11 @@ public class BusinessService(AppDbContext context) : IBusinessService
     }
 
     public async Task<(BusinessSummaryResult Result, GetSummaryResponse? Response)> GetBusinessSummaryAsync(
-        Guid businessId, Guid requestingUserId)
+        Guid businessId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         var business = await context.Businesses
             .AsNoTracking()
-            .SingleOrDefaultAsync(b => b.Id == businessId && !b.IsDeleted);
+            .SingleOrDefaultAsync(b => b.Id == businessId && !b.IsDeleted, cancellationToken);
 
         if (business is null)
         {
@@ -87,7 +88,7 @@ public class BusinessService(AppDbContext context) : IBusinessService
                 UpcomingAppointmentsCount = x.UpcomingCount,
                 ExpectedRevenue = x.UpcomingCount * x.Price
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return (BusinessSummaryResult.Success, new GetSummaryResponse { Services = services });
     }

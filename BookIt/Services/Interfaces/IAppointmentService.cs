@@ -6,7 +6,8 @@ namespace BookIt.Services.Interfaces;
 
 public interface IAppointmentService
 {
-    Task<CreateAppointmentResult> CreateAppointmentAsync(Guid clientId, AppointmentRequest request);
+    Task<CreateAppointmentResult> CreateAppointmentAsync(
+        Guid clientId, AppointmentRequest request, CancellationToken cancellationToken = default);
 
     Task<GetAppointmentResponse> GetAppointmentsAsync(
         Guid userId,
@@ -15,5 +16,6 @@ public interface IAppointmentService
         DateTimeOffset? to,
         AppointmentStatus? status,
         int pageNumber,
-        int pageSize);
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }

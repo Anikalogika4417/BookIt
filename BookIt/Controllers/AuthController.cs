@@ -10,9 +10,9 @@ namespace BookIt.Controllers;
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> Register(AuthRequest request)
+    public async Task<IActionResult> Register(AuthRequest request, CancellationToken cancellationToken = default)
     {
-        var created = await authService.RegisterAsync(request);
+        var created = await authService.RegisterAsync(request, cancellationToken);
         if (!created)
         {
             return Conflict("Email is already registered.");
@@ -22,9 +22,9 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        var token = await authService.LoginAsync(request);
+        var token = await authService.LoginAsync(request, cancellationToken);
         if (token is null)
         {
             return Unauthorized("Invalid email or password.");

@@ -14,12 +14,12 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
     private const int DefaultPageSize = 10;
     private const int MaxPageSize = 50;
 
-
-    public async Task<CreateAppointmentResult> CreateAppointmentAsync(Guid clientId, AppointmentRequest request)
+    public async Task<CreateAppointmentResult> CreateAppointmentAsync(
+        Guid clientId, AppointmentRequest request, CancellationToken cancellationToken = default)
     {
         var service = await context.Services
             .AsNoTracking()
-            .SingleOrDefaultAsync(s => s.Id == request.ServiceId && !s.IsDeleted);
+            .SingleOrDefaultAsync(s => s.Id == request.ServiceId && !s.IsDeleted, cancellationToken);
 
         if (service is null)
         {
@@ -33,7 +33,7 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
         var ownerOverlap = await context.Appointments
             .Where(a => a.Status != AppointmentStatus.Cancelled)
             .Where(a => a.Service.BusinessId == service.BusinessId)
-            .AnyAsync(a => a.StartTime < endTime && request.StartTime < a.EndTime);
+            .AnyAsync(a => a.StartTime < endTime && request.StartTime < a.EndTime, cancellationToken);
 
         if (ownerOverlap)
         {
@@ -43,7 +43,7 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
         var clientOverlap = await context.Appointments
             .Where(a => a.Status != AppointmentStatus.Cancelled)
             .Where(a => a.ClientId == clientId)
-            .AnyAsync(a => a.StartTime < endTime && request.StartTime < a.EndTime);
+            .AnyAsync(a => a.StartTime < endTime && request.StartTime < a.EndTime, cancellationToken);
 
         if (clientOverlap)
         {
@@ -62,7 +62,7 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
         };
 
         context.Appointments.Add(appointment);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
 
         return CreateAppointmentResult.Success;
     }
@@ -74,7 +74,8 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
         DateTimeOffset? to,
         AppointmentStatus? status,
         int pageNumber,
-        int pageSize)
+        int pageSize,
+        CancellationToken cancellationToken = default)
     {
         pageNumber = pageNumber < 1 ? 1 : pageNumber;
         pageSize = pageSize < 1 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
@@ -98,7 +99,7 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
             query = query.Where(a => a.Status == status.Value);
         }
 
-        var totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync(cancellationToken);
 
         var appointments = await query
             .OrderByDescending(a => a.StartTime)
@@ -115,7 +116,7 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
                 Price = a.Service.Price,
                 Status = a.Status
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return new GetAppointmentResponse
         {

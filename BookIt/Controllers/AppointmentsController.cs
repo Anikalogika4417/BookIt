@@ -14,11 +14,11 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
 {
     [HttpPost]
     [Authorize(Roles = nameof(UserRole.Client))]
-    public async Task<IActionResult> CreateAppointment(AppointmentRequest request)
+    public async Task<IActionResult> CreateAppointment(AppointmentRequest request, CancellationToken cancellationToken = default)
     {
         var clientId = User.GetUserId();
 
-        var result = await appointmentService.CreateAppointmentAsync(clientId, request);
+        var result = await appointmentService.CreateAppointmentAsync(clientId, request, cancellationToken);
 
         return result switch
         {
@@ -35,12 +35,14 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
         [FromQuery] DateTimeOffset? to,
         [FromQuery] AppointmentStatus? status,
         [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        CancellationToken cancellationToken = default)
     {
         var userId = User.GetUserId();
         var role = User.GetRole();
 
-        var response = await appointmentService.GetAppointmentsAsync(userId, role, from, to, status, pageNumber, pageSize);
+        var response = await appointmentService.GetAppointmentsAsync(
+            userId, role, from, to, status, pageNumber, pageSize, cancellationToken);
         return Ok(response);
     }
 }
