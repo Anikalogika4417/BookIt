@@ -28,12 +28,14 @@ public class AppointmentService(AppDbContext context, ILogger<AppointmentService
             return CreateAppointmentResult.ServiceNotFound;
         }
 
-        var endTime = request.StartTime.AddMinutes(service.DurationMinutes);
+        // Npgsql only accepts UTC (Offset=0) for timestamptz columns/parameters.
+        var startTime = request.StartTime.ToUniversalTime();
+        var endTime = startTime.AddMinutes(service.DurationMinutes);
 
         var serviceOverlap = await context.Appointments
             .Where(a => a.Status != AppointmentStatus.Cancelled)
             .Where(a => a.ServiceId == service.Id)
-            .AnyAsync(a => a.StartTime < endTime && request.StartTime < a.EndTime, cancellationToken);
+            .AnyAsync(a => a.StartTime < endTime && startTime < a.EndTime, cancellationToken);
 
         if (serviceOverlap)
         {
@@ -43,7 +45,7 @@ public class AppointmentService(AppDbContext context, ILogger<AppointmentService
         var clientOverlap = await context.Appointments
             .Where(a => a.Status != AppointmentStatus.Cancelled)
             .Where(a => a.ClientId == clientId)
-            .AnyAsync(a => a.StartTime < endTime && request.StartTime < a.EndTime, cancellationToken);
+            .AnyAsync(a => a.StartTime < endTime && startTime < a.EndTime, cancellationToken);
 
         if (clientOverlap)
         {
@@ -54,7 +56,7 @@ public class AppointmentService(AppDbContext context, ILogger<AppointmentService
         {
             ServiceId = service.Id,
             ClientId = clientId,
-            StartTime = request.StartTime,
+            StartTime = startTime,
             EndTime = endTime,
             Status = AppointmentStatus.Pending,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -87,14 +89,17 @@ public class AppointmentService(AppDbContext context, ILogger<AppointmentService
             ? context.Appointments.Where(a => a.ClientId == userId)
             : context.Appointments.Where(a => a.Service.Business.OwnerId == userId);
 
+        // Npgsql only accepts UTC (Offset=0) for timestamptz columns/parameters.
         if (from.HasValue)
         {
-            query = query.Where(a => a.StartTime >= from.Value);
+            var fromUtc = from.Value.ToUniversalTime();
+            query = query.Where(a => a.StartTime >= fromUtc);
         }
 
         if (to.HasValue)
         {
-            query = query.Where(a => a.EndTime <= to.Value);
+            var toUtc = to.Value.ToUniversalTime();
+            query = query.Where(a => a.EndTime <= toUtc);
         }
 
         if (status.HasValue)
