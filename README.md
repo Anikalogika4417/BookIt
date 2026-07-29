@@ -52,7 +52,7 @@ Backend for BookIt, a platform where business owners (barbers, physiotherapists,
 4. Run the API:
 
 ```bash
-   dotnet run --project BookIt
+   dotnet run --project BookIt --launch-profile https
 ```
 
 The app seeds the database automatically on first run (only if the `users` table is empty).
