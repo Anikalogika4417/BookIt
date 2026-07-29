@@ -10,12 +10,14 @@ namespace BookIt.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/appointments")]
-public class AppointmentsController(IAppointmentService appointmentService) : ControllerBase
+public class AppointmentsController(IAppointmentService appointmentService, ILogger<AppointmentsController> logger) : ControllerBase
 {
     [HttpPost]
     [Authorize(Roles = nameof(UserRole.Client))]
     public async Task<IActionResult> CreateAppointment(AppointmentRequest request, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Received request {Action}", nameof(CreateAppointment));
+
         var clientId = User.GetUserId();
 
         var result = await appointmentService.CreateAppointmentAsync(clientId, request, cancellationToken);
@@ -38,6 +40,8 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Received request {Action}", nameof(GetAppointments));
+
         if (from.HasValue && to.HasValue && from.Value > to.Value)
         {
             return BadRequest("'from' must not be later than 'to'. Please swap the values.");

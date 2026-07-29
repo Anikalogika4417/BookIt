@@ -16,20 +16,22 @@ public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggi
         });
 
         var stopwatch = Stopwatch.StartNew();
-        try
+        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
         {
-            await next(context);
-        }
-        finally
-        {
-            stopwatch.Stop();
-            logger.LogInformation(
-                "{Method} {Path} responded {StatusCode} in {ElapsedMilliseconds}ms (CorrelationId: {CorrelationId})",
-                context.Request.Method,
-                context.Request.Path,
-                context.Response.StatusCode,
-                stopwatch.ElapsedMilliseconds,
-                correlationId);
+            try
+            {
+                await next(context);
+            }
+            finally
+            {
+                stopwatch.Stop();
+                logger.LogInformation(
+                    "{Method} {Path} responded {StatusCode} in {ElapsedMilliseconds}ms",
+                    context.Request.Method,
+                    context.Request.Path,
+                    context.Response.StatusCode,
+                    stopwatch.ElapsedMilliseconds);
+            }
         }
     }
 }

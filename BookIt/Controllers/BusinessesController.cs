@@ -9,7 +9,7 @@ namespace BookIt.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/businesses")]
-public class BusinessesController(IBusinessService businessService) : ControllerBase
+public class BusinessesController(IBusinessService businessService, ILogger<BusinessesController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetBusinesses(
@@ -19,6 +19,8 @@ public class BusinessesController(IBusinessService businessService) : Controller
         [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Received request {Action}", nameof(GetBusinesses));
+
         var response = await businessService.GetBusinessesAsync(pageNumber, pageSize, category, search, cancellationToken);
         return Ok(response);
     }
@@ -27,6 +29,8 @@ public class BusinessesController(IBusinessService businessService) : Controller
     [Authorize(Roles = nameof(UserRole.BusinessOwner))]
     public async Task<IActionResult> GetBusinessSummary(Guid id, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Received request {Action}", nameof(GetBusinessSummary));
+
         var (result, response) = await businessService.GetBusinessSummaryAsync(id, User.GetUserId(), cancellationToken);
 
         return result switch

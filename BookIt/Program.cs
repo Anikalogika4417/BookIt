@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddSimpleConsole(options => options.IncludeScopes = true);
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

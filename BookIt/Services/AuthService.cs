@@ -11,10 +11,12 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace BookIt.Services;
 
-public class AuthService(AppDbContext context, JwtSettings jwtSettings) : IAuthService
+public class AuthService(AppDbContext context, JwtSettings jwtSettings, ILogger<AuthService> logger) : IAuthService
 {
     public async Task<bool> RegisterAsync(AuthRequest request, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Started {Method}", nameof(RegisterAsync));
+
         var emailTaken = await context.Users.AnyAsync(u => u.Email == request.Email, cancellationToken);
         if (emailTaken)
         {
@@ -33,11 +35,14 @@ public class AuthService(AppDbContext context, JwtSettings jwtSettings) : IAuthS
         context.Users.Add(user);
         await context.SaveChangesAsync(cancellationToken);
 
+        logger.LogInformation("Finished {Method}", nameof(RegisterAsync));
         return true;
     }
 
     public async Task<string?> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Started {Method}", nameof(LoginAsync));
+
         var user = await context.Users
             .AsNoTracking()
             .SingleOrDefaultAsync(u => u.Email == request.Email && !u.IsDeleted, cancellationToken);
@@ -46,6 +51,7 @@ public class AuthService(AppDbContext context, JwtSettings jwtSettings) : IAuthS
             return null;
         }
 
+        logger.LogInformation("Finished {Method}", nameof(LoginAsync));
         return GenerateToken(user);
     }
 

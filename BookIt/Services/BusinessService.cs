@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookIt.Services;
 
-public class BusinessService(AppDbContext context) : IBusinessService
+public class BusinessService(AppDbContext context, ILogger<BusinessService> logger) : IBusinessService
 {
     private const int DefaultPageSize = 10;
     private const int MaxPageSize = 50;
@@ -15,6 +15,8 @@ public class BusinessService(AppDbContext context) : IBusinessService
     public async Task<BusinessResponse> GetBusinessesAsync(
         int pageNumber, int pageSize, string? category, string? search, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Started {Method}", nameof(GetBusinessesAsync));
+
         pageNumber = pageNumber < 1 ? 1 : pageNumber;
         pageSize = pageSize < 1 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
 
@@ -44,6 +46,9 @@ public class BusinessService(AppDbContext context) : IBusinessService
             })
             .ToListAsync(cancellationToken);
 
+        logger.LogInformation(
+            "Finished {Method}, returned {Count} items", nameof(GetBusinessesAsync), businesses.Count);
+
         return new BusinessResponse
         {
             Businesses = businesses,
@@ -56,6 +61,8 @@ public class BusinessService(AppDbContext context) : IBusinessService
     public async Task<(BusinessSummaryResult Result, GetSummaryResponse? Response)> GetBusinessSummaryAsync(
         Guid businessId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Started {Method}", nameof(GetBusinessSummaryAsync));
+
         var business = await context.Businesses
             .AsNoTracking()
             .SingleOrDefaultAsync(b => b.Id == businessId && !b.IsDeleted, cancellationToken);
@@ -89,6 +96,9 @@ public class BusinessService(AppDbContext context) : IBusinessService
                 ExpectedRevenue = x.UpcomingCount * x.Price
             })
             .ToListAsync(cancellationToken);
+
+        logger.LogInformation(
+            "Finished {Method}, returned {Count} items", nameof(GetBusinessSummaryAsync), services.Count);
 
         return (BusinessSummaryResult.Success, new GetSummaryResponse { Services = services });
     }

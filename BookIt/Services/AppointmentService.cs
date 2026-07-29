@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookIt.Services;
 
-public class AppointmentService(AppDbContext context) : IAppointmentService
+public class AppointmentService(AppDbContext context, ILogger<AppointmentService> logger) : IAppointmentService
 {
     private const int DefaultPageSize = 10;
     private const int MaxPageSize = 50;
@@ -17,6 +17,8 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
     public async Task<CreateAppointmentResult> CreateAppointmentAsync(
         Guid clientId, AppointmentRequest request, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Started {Method}", nameof(CreateAppointmentAsync));
+
         var service = await context.Services
             .AsNoTracking()
             .SingleOrDefaultAsync(s => s.Id == request.ServiceId && !s.IsDeleted, cancellationToken);
@@ -62,6 +64,7 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
         context.Appointments.Add(appointment);
         await context.SaveChangesAsync(cancellationToken);
 
+        logger.LogInformation("Finished {Method}", nameof(CreateAppointmentAsync));
         return CreateAppointmentResult.Success;
     }
 
@@ -75,6 +78,8 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
         int pageSize,
         CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("Started {Method}", nameof(GetAppointmentsAsync));
+
         pageNumber = pageNumber < 1 ? 1 : pageNumber;
         pageSize = pageSize < 1 ? DefaultPageSize : Math.Min(pageSize, MaxPageSize);
 
@@ -114,6 +119,9 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
                 Status = a.Status
             })
             .ToListAsync(cancellationToken);
+
+        logger.LogInformation(
+            "Finished {Method}, returned {Count} items", nameof(GetAppointmentsAsync), appointments.Count);
 
         return new GetAppointmentResponse
         {
