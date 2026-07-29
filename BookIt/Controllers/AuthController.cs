@@ -10,9 +10,9 @@ namespace BookIt.Controllers;
 public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> Register(AuthRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> RegisterAsync(AuthRequest request, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Received request {Action}", nameof(Register));
+        logger.LogInformation("Received request {Action}", nameof(RegisterAsync));
 
         var created = await authService.RegisterAsync(request, cancellationToken);
         if (!created)
@@ -24,9 +24,9 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Received request {Action}", nameof(Login));
+        logger.LogInformation("Received request {Action}", nameof(LoginAsync));
 
         var token = await authService.LoginAsync(request, cancellationToken);
         if (token is null)

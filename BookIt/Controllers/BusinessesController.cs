@@ -12,14 +12,14 @@ namespace BookIt.Controllers;
 public class BusinessesController(IBusinessService businessService, ILogger<BusinessesController> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetBusinesses(
+    public async Task<IActionResult> GetBusinessesAsync(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? category = null,
         [FromQuery] string? search = null,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Received request {Action}", nameof(GetBusinesses));
+        logger.LogInformation("Received request {Action}", nameof(GetBusinessesAsync));
 
         var response = await businessService.GetBusinessesAsync(pageNumber, pageSize, category, search, cancellationToken);
         return Ok(response);
@@ -27,9 +27,9 @@ public class BusinessesController(IBusinessService businessService, ILogger<Busi
 
     [HttpGet("{id:guid}/summary")]
     [Authorize(Roles = nameof(UserRole.BusinessOwner))]
-    public async Task<IActionResult> GetBusinessSummary(Guid id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetBusinessSummaryAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Received request {Action}", nameof(GetBusinessSummary));
+        logger.LogInformation("Received request {Action}", nameof(GetBusinessSummaryAsync));
 
         var (result, response) = await businessService.GetBusinessSummaryAsync(id, User.GetUserId(), cancellationToken);
 

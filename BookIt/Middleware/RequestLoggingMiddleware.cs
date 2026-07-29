@@ -16,7 +16,7 @@ public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggi
         });
 
         var stopwatch = Stopwatch.StartNew();
-        using (logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        using (logger.BeginScope("CorrelationId:{CorrelationId}", correlationId))
         {
             try
             {

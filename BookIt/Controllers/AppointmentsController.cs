@@ -14,9 +14,9 @@ public class AppointmentsController(IAppointmentService appointmentService, ILog
 {
     [HttpPost]
     [Authorize(Roles = nameof(UserRole.Client))]
-    public async Task<IActionResult> CreateAppointment(AppointmentRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CreateAppointmentAsync(AppointmentRequest request, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Received request {Action}", nameof(CreateAppointment));
+        logger.LogInformation("Received request {Action}", nameof(CreateAppointmentAsync));
 
         var clientId = User.GetUserId();
 
@@ -32,7 +32,7 @@ public class AppointmentsController(IAppointmentService appointmentService, ILog
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAppointments(
+    public async Task<IActionResult> GetAppointmentsAsync(
         [FromQuery] DateTimeOffset? from,
         [FromQuery] DateTimeOffset? to,
         [FromQuery] AppointmentStatus? status,
@@ -40,7 +40,7 @@ public class AppointmentsController(IAppointmentService appointmentService, ILog
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Received request {Action}", nameof(GetAppointments));
+        logger.LogInformation("Received request {Action}", nameof(GetAppointmentsAsync));
 
         if (from.HasValue && to.HasValue && from.Value > to.Value)
         {
