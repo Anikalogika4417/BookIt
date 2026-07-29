@@ -100,7 +100,7 @@ public class AppointmentService(AppDbContext context) : IAppointmentService
         var totalCount = await query.CountAsync(cancellationToken);
 
         var appointments = await query
-            .OrderByDescending(a => a.StartTime)
+            .OrderBy(a => a.StartTime)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(a => new AppointmentDTO

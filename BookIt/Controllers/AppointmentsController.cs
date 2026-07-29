@@ -38,6 +38,11 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
         [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
+        if (from.HasValue && to.HasValue && from.Value > to.Value)
+        {
+            return BadRequest("'from' must not be later than 'to'. Please swap the values.");
+        }
+
         var userId = User.GetUserId();
         var role = User.GetRole();
 

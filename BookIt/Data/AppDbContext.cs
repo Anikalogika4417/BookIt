@@ -14,6 +14,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.HasPostgresExtension("pg_trgm");
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(u => u.Email).IsUnique();
@@ -24,6 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(b => b.OwnerId);
             entity.HasIndex(b => b.Category);
             entity.HasIndex(b => b.CreatedAt).IsDescending();
+            entity.HasIndex(b => b.Name).HasMethod("gin").HasOperators("gin_trgm_ops");
 
             // 1:many — an owner may run several businesses.
             entity.HasOne(b => b.Owner)
